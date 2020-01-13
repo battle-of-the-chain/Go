@@ -1,0 +1,188 @@
+
+gameplay.png
+size: 1024,512
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+blackpx
+  rotate: false
+  xy: 2, 2
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+mine
+  rotate: false
+  xy: 460, 364
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+mineb
+  rotate: false
+  xy: 2, 324
+  size: 167, 168
+  orig: 167, 168
+  offset: 0, 0
+  index: 7
+mineb
+  rotate: false
+  xy: 2, 154
+  size: 167, 168
+  orig: 167, 168
+  offset: 0, 0
+  index: 8
+mineb
+  rotate: false
+  xy: 171, 335
+  size: 157, 157
+  orig: 157, 157
+  offset: 0, 0
+  index: 6
+mineb
+  rotate: false
+  xy: 2, 5
+  size: 150, 147
+  orig: 150, 147
+  offset: 0, 0
+  index: 3
+mineb
+  rotate: false
+  xy: 171, 196
+  size: 128, 137
+  orig: 128, 137
+  offset: 0, 0
+  index: 4
+mineb
+  rotate: false
+  xy: 330, 360
+  size: 128, 132
+  orig: 128, 132
+  offset: 0, 0
+  index: 5
+mineb
+  rotate: false
+  xy: 590, 364
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 0
+mineb
+  rotate: false
+  xy: 720, 364
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 1
+mineb
+  rotate: false
+  xy: 720, 364
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 9
+mineb
+  rotate: false
+  xy: 850, 364
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: 2
+minecell
+  rotate: false
+  xy: 859, 188
+  size: 44, 44
+  orig: 44, 44
+  offset: 0, 0
+  index: -1
+minecell1
+  rotate: false
+  xy: 171, 66
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell2
+  rotate: false
+  xy: 301, 205
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell3
+  rotate: false
+  xy: 301, 75
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell4
+  rotate: false
+  xy: 460, 234
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell5
+  rotate: false
+  xy: 590, 234
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell6
+  rotate: false
+  xy: 720, 234
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell7
+  rotate: false
+  xy: 850, 234
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell8
+  rotate: false
+  xy: 431, 104
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+minecell_flag
+  rotate: false
+  xy: 691, 174
+  size: 58, 58
+  orig: 58, 58
+  offset: 0, 0
+  index: -1
+minecelle
+  rotate: false
+  xy: 561, 104
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+smile_happy
+  rotate: false
+  xy: 691, 120
+  size: 52, 52
+  orig: 52, 52
+  offset: 0, 0
+  index: -1
+smile_sad
+  rotate: false
+  xy: 751, 180
+  size: 52, 52
+  orig: 52, 52
+  offset: 0, 0
+  index: -1
+smile_win
+  rotate: false
+  xy: 805, 180
+  size: 52, 52
+  orig: 52, 52
+  offset: 0, 0
+  index: -1
