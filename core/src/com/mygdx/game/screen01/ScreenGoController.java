@@ -17,7 +17,16 @@ import com.mygdx.game.hud.MyClickListener;
 import com.mygdx.game.util.GdxUtils;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Arrays;
 import java.util.EnumSet;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 
 public class ScreenGoController implements GestureDetector.GestureListener {
@@ -40,6 +49,10 @@ public class ScreenGoController implements GestureDetector.GestureListener {
     private int territorySize = 0;
     boolean foundWhite = false;
     boolean foundBlack = false;
+    boolean receivedHopeless = false;
+    boolean sentHopeless = false;
+
+    public static Socket socket;
 
     public float animationTime = 0;
 
@@ -65,6 +78,7 @@ public class ScreenGoController implements GestureDetector.GestureListener {
     }
 
     CurrentPlayer currentPlayer;
+    CurrentPlayer myColor = CurrentPlayer.WHITE;
     public enum CellState{
         EMPTY,
         BLACK,
@@ -79,18 +93,28 @@ public class ScreenGoController implements GestureDetector.GestureListener {
 
     public EnumSet<CellState>[][] boardState;
     EnumSet<CellState>[][] boardStateBeforePlace;
+    EnumSet<CellState>[][] boardStateAtConsecutivePass;
+
 
     Integer[][] territoryNumber;
+    boolean[][] myHopeless;
+    boolean[][] opponentsHopeless;
+
 
     public ScreenGoController(int width, int height, AssetManager assetManager) {
+        boardStateAtConsecutivePass = (EnumSet<CellState>[][]) new EnumSet<?>[width][height];
         this.boardState = (EnumSet<CellState>[][]) new EnumSet<?>[width][height];
         this.width = width;
         this.height = height;
         territoryNumber = new Integer[width][height];
+        myHopeless = new boolean[width][height];
+        opponentsHopeless = new boolean[width][height];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 boardState[x][y] = EnumSet.allOf(CellState.class);
+                myHopeless[x][y] = false;
+                opponentsHopeless[x][y] = false;
             }
         }
 
@@ -100,6 +124,10 @@ public class ScreenGoController implements GestureDetector.GestureListener {
 
         boardStateBeforePlace = new EnumSet[width][height];
         placeStoneSound = assetManager.get(AssetDescriptors.PLACE_SOUND);
+
+
+        connectSocket();
+        configSocketEvents();
     }
 
     public void resize(Camera boardCam, Viewport vp, HUD hud) {
@@ -134,8 +162,11 @@ public class ScreenGoController implements GestureDetector.GestureListener {
             boardState[x][y].remove(CellState.WHITE);
             boardState[x][y].add(CellState.EMPTY);
         }
+       myHopeless[x][y] = true;
 
     }
+
+
     public void place(int x , int y){
         consecutivePass = 0; //if stone is placed, it's not a pass
         if(boardState[x][y].contains(CellState.EMPTY)){
@@ -190,6 +221,23 @@ public class ScreenGoController implements GestureDetector.GestureListener {
 
         GameManager.INSTANCE.addResult(scoreBlack, scoreWhite);
         GameManager.INSTANCE.saveResults();
+        disconnect();
+    }
+
+    boolean amIActivePlayer(){
+        if(currentPlayer == myColor){
+            return true;
+        }
+        return false;
+    }
+
+    void switchMyColor(){
+        if(myColor == CurrentPlayer.BLACK){
+            myColor = CurrentPlayer.WHITE;
+        }
+        else{
+            myColor = CurrentPlayer.BLACK;
+        }
     }
 
     void switchPlayer(){
@@ -202,19 +250,29 @@ public class ScreenGoController implements GestureDetector.GestureListener {
     }
 
     void pass(){
+        if(!amIActivePlayer()){
+            return;
+        }
         if(currentPlayer == CurrentPlayer.BLACK){
             capturedWhite++;
         }
         else{
             capturedBlack++;
         }
+        hudRef.updateTerritory(capturedBlack, capturedWhite);
         consecutivePass++;
         if(consecutivePass == 2){
             gameState = GameState.REMOVING_HOPELESS;
-            //gameState = GameState.END;
-            //log.info("END GAME");
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    boardStateAtConsecutivePass[x][y] = boardState[x][y].clone();
+                }
+            }
         }
-        switchPlayer();
+        else{
+            switchPlayer();
+        }
+        socket.emit("pass");
     }
 
     boolean areLibertiesSame(EnumSet<CellState>[][] boardState1,EnumSet<CellState>[][] boardState2 ){
@@ -453,32 +511,6 @@ public class ScreenGoController implements GestureDetector.GestureListener {
         }
     }
 
-
-    /*void floodFill(int x, int y, CellState cellStateTargetColor, int newTerritoryNumber){
-        if(x >= width || x < 0 || y >= height || y < 0){
-            return;
-        }
-        if(!boardState[x][y].contains(cellStateTargetColor) || territoryNumber[x][y] == newTerritoryNumber){
-            return;
-        }
-        else{
-            territoryNumber[x][y] = newTerritoryNumber;
-            log.info("Added territory: " + newTerritoryNumber + " to X: " + x + " Y: " + y);
-        }
-
-        //UP
-        floodFill(x,y+1, cellStateTargetColor, newTerritoryNumber);
-        //DOWN
-        floodFill(x,y-1, cellStateTargetColor, newTerritoryNumber);
-        //LEFT
-        floodFill(x-1,y, cellStateTargetColor, newTerritoryNumber);
-        //RIGHT
-        floodFill(x+1,y, cellStateTargetColor, newTerritoryNumber);
-
-
-    }*/
-
-
     void floodFill(int x, int y, CellState cellStateTargetColor, int newTerritoryNumber){
         if(x >= width || x < 0 || y >= height || y < 0){
             //izven plošče
@@ -511,28 +543,6 @@ public class ScreenGoController implements GestureDetector.GestureListener {
         }
     }
 
-    void floodFillTerritoryAndFindBordering(int x, int y){
-        if(x >= width || x < 0 || y >= height || y < 0){
-            return;
-        }
-        else if(boardState[x][y].contains(CellState.WHITE)){
-            foundWhite = true;
-            return;
-        }
-        else if(boardState[x][y].contains(CellState.BLACK)){
-            foundBlack = true;
-            return;
-        }
-
-        //UP
-        floodFillTerritoryAndFindBordering(x,y+1);
-        //DOWN
-        floodFillTerritoryAndFindBordering(x,y-1);
-        //LEFT
-        floodFillTerritoryAndFindBordering(x-1,y);
-        //RIGHT
-        floodFillTerritoryAndFindBordering(x+1,y);
-    }
 
     void countTerritory(){
 
@@ -583,7 +593,7 @@ public class ScreenGoController implements GestureDetector.GestureListener {
         log.info("User tapped at - X: " + sx + " Y:" + sy);
         Vector3 touchPoint = new Vector3(sx,sy,0);
         boardViewport.unproject(touchPoint);
-        for (MyClickListener item : listeners) item.onClickEvent(touchPoint.x, touchPoint.y); //notifyAll
+        //for (MyClickListener item : listeners) item.onClickEvent(touchPoint.x, touchPoint.y); //notifyAll
         if(gameState == GameState.END){
             return;
         }
@@ -593,7 +603,7 @@ public class ScreenGoController implements GestureDetector.GestureListener {
         int x = (int) touchPoint.x;
         int y = (int) touchPoint.y;
         log.debug("Clicked:" + x + ", " + y);
-        if ((x > width-1) || (y > height-1) || (x < 0) || (y < 0)){
+        if ((x > width-1) || (y > height-1) || (x < 0) || (y < 0) || !amIActivePlayer()){
             return;
         }
 
@@ -608,6 +618,14 @@ public class ScreenGoController implements GestureDetector.GestureListener {
         }else{
             place(x, y);
             log.info("Placed at - X: " + (int)touchPoint.x + " Y: " + (int)touchPoint.y);
+            JSONObject data = new JSONObject();
+            try{
+                data.put("x", x);
+                data.put("y", y);
+                socket.emit("place", data);
+            }catch (JSONException e){
+                Gdx.app.log("Socket.IO","Error sending place data");
+            }
         }
     }
     @Override
@@ -650,6 +668,177 @@ public class ScreenGoController implements GestureDetector.GestureListener {
     @Override
     public void pinchStop() {
 
+    }
+
+
+    public void compareHopeless(){
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if(!(myHopeless[x][y] == true && opponentsHopeless[x][y] == true)){
+                    myHopeless[x][y] = false;
+                }
+            }
+        }
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                boardState[x][y] = boardStateAtConsecutivePass[x][y].clone();
+            }
+        }
+        //remove agreed
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if(myHopeless[x][y]){
+                    remove(x,y);
+                }
+            }
+        }
+        endGame();
+    }
+
+    //ONLINE
+
+    public void disconnect(){
+        socket.disconnect();
+    }
+
+    public void sendHopelessToOpponent(){
+        JSONObject data = new JSONObject();
+        try{
+            String stringToSend = "";
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if(myHopeless[x][y] == true){
+                        stringToSend+="1";
+                    }else{
+                        stringToSend+="0";
+                    }
+                }
+                stringToSend+="\n";
+            }
+            Gdx.app.log("Socket.IO", "Hopeless string:" + stringToSend);
+            data.put("hopeless", stringToSend);
+            socket.emit("hopeless", data);
+            sentHopeless = true;
+            if(receivedHopeless && sentHopeless){
+                compareHopeless();
+            }
+        }catch (JSONException e){
+            Gdx.app.log("Socket.IO","Error sending hopeless data");
+        }
+
+    }
+
+
+
+    public void connectSocket(){
+        try {
+            socket = IO.socket("http://localhost:8080");
+            //socket.disconnect();
+            socket.connect();
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
+    public void configSocketEvents(){
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Gdx.app.log("SocketIO","Connected");
+            }
+        }).on("socketID", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String id = data.getString("id");
+                    Gdx.app.log("SocketIO", "My ID: " + id);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO", "Error getting ID");
+                }
+
+
+            }
+        }).on("newPlayer", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String playerID = data.getString("id");
+                    Gdx.app.log("SocketIO", "New Player Connect: " + playerID);
+                    switchMyColor();
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO", "Error getting new player id");
+                }
+            }
+        }).on("place", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String playerId = data.getString("id");
+                    int x = data.getInt("x");
+                    int y = data.getInt("y");
+                    place(x,y);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO", "Error getting new player id");
+                }
+            }
+        }).on("pass", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Gdx.app.log("SocketIO", "Opp passed");
+                consecutivePass++;
+                if(myColor == CurrentPlayer.BLACK){
+                    capturedBlack++;
+                }
+                else{
+                    capturedWhite++;
+                }
+                hudRef.updateTerritory(capturedBlack, capturedWhite);
+                if(consecutivePass == 2){
+                    gameState = GameState.REMOVING_HOPELESS;
+                    for (int y = 0; y < height; y++) {
+                        for (int x = 0; x < width; x++) {
+                            boardStateAtConsecutivePass[x][y] = boardState[x][y].clone();
+                        }
+                    }
+                }
+                switchPlayer();
+            }
+        }).on("hopeless", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject data = (JSONObject) args[0];
+                try {
+                    String string = data.getString("hopeless");
+                    String[] stringArrayRows = string.split("\n");
+
+
+                    for (int y = 0; y < height; y++) {
+                        String[] stringArrayColumns = stringArrayRows[y].split("(?<=\\G.)");
+                        for (int x = 0; x < width; x++) {
+                            if(stringArrayColumns[x].equals("1")){
+                                opponentsHopeless[x][y] = true;
+                            }
+                            Gdx.app.log("SocketIO", stringArrayColumns[x]);
+                        }
+                    }
+                    receivedHopeless = true;
+                    if(receivedHopeless && sentHopeless){
+                        compareHopeless();
+                    }
+
+                    Gdx.app.log("SocketIO", "Got hopeless:\n" + string);
+                }
+                catch (JSONException e){
+                    Gdx.app.log("SocketIO", "Error getting hopeless");
+                }
+            }
+        });
     }
 
 }

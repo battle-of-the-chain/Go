@@ -59,6 +59,7 @@ project(":core") {
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        implementation "io.socket:socket.io-client:0.6.2"
         
     }
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.utils.Logger;
 import com.mygdx.game.Go;
 
+
 public class ScreenGo extends ScreenAdapter {
     public static final Logger log = new Logger(ScreenGo.class.getName(), Logger.DEBUG);
     ScreenGoController controller;
@@ -15,7 +16,7 @@ public class ScreenGo extends ScreenAdapter {
 
     public ScreenGo(Go game) {
         this.gameMain = game;
-        controller = new ScreenGoController(5,5, game.getAssetManager());
+        controller = new ScreenGoController(19,19, game.getAssetManager());
         renderer = new ScreenGoRenderer(gameMain,controller);
     }
 
@@ -36,8 +37,10 @@ public class ScreenGo extends ScreenAdapter {
         }
         else if(Gdx.input.isKeyJustPressed(Input.Keys.C) && controller.gameState == ScreenGoController.GameState.REMOVING_HOPELESS){
             log.info("END");
-            controller.endGame();
+            controller.sendHopelessToOpponent();
+            //controller.endGame();
         }
+
 
     }
 

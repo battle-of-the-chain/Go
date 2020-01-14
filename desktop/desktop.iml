@@ -48,11 +48,23 @@
     <orderEntry type="library" exported="" name="Gradle: lwjgl-platform-2.9.3-natives-osx" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jinput-2.0.5" level="project" />
     <orderEntry type="library" exported="" name="Gradle: jutils-1.0.0" level="project" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: socket.io-client-0.6.2" level="project" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: engine.io-client-0.6.2" level="project" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: json-20090211" level="project" />
     <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: jinput-platform-2.0.5-natives-linux" level="project" />
     <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: jinput-platform-2.0.5-natives-windows" level="project" />
     <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: jinput-platform-2.0.5-natives-osx" level="project" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: okhttp-ws-2.5.0" level="project" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: okhttp-2.5.0" level="project" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: okio-1.6.0" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="Gradle: socket.io-client-0.6.2" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="Gradle: engine.io-client-0.6.2" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="Gradle: json-20090211" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="Gradle: jinput-platform-2.0.5-natives-linux" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="Gradle: jinput-platform-2.0.5-natives-windows" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="Gradle: jinput-platform-2.0.5-natives-osx" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="Gradle: okhttp-ws-2.5.0" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="Gradle: okhttp-2.5.0" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="Gradle: okio-1.6.0" level="project" />
   </component>
 </module>

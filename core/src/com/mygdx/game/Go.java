@@ -15,6 +15,9 @@ import com.mygdx.game.game_manager.GameManager;
 import com.mygdx.game.mainmenuscreen.MainMenuScreen;
 import com.mygdx.game.screen01.ScreenGo;
 
+import io.socket.client.Socket;
+
+
 public class Go extends Game {
 	AssetManager assetManager;
 
@@ -23,6 +26,7 @@ public class Go extends Game {
 	}
 	public SpriteBatch batch;
 	public BitmapFont font;
+	//
 	
 	@Override
 	public void create () {
@@ -37,6 +41,7 @@ public class Go extends Game {
 		assetManager.load(AssetDescriptors.MENU_SKIN);
 		assetManager.finishLoading();
 
+
 		this.setScreen(new MainMenuScreen(this));
 		//selectFirstScreen();
 	}
@@ -44,29 +49,6 @@ public class Go extends Game {
 	public void selectFirstScreen() {
 		setScreen(new ScreenGo(this));
 	}
-
-
-
-	/*public void changeScreen(int screen){
-		switch(screen){
-			case MENU:
-				if(menuScreen == null) menuScreen = new MenuScreen();
-				this.setScreen(menuScreen);
-				break;
-			case PREFERENCES:
-				if(preferencesScreen == null) preferencesScreen = new PreferencesScreen();
-				this.setScreen(preferencesScreen);
-				break;
-			case APPLICATION:
-				if(mainScreen == null) mainScreen = new MainScreen();
-				this.setScreen(mainScreen);
-				break;
-			case ENDGAME:
-				if(endScreen == null) endScreen = new EndScreen();
-				this.setScreen(endScreen);
-				break;
-		}
-	}*/
 
 	public void safeExit() {
 		Gdx.app.exit();

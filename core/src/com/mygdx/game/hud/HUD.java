@@ -62,7 +62,7 @@ public class HUD implements Disposable, MyClickListener {
     }
 
     public void renderUpdate(Camera cameraFont, SpriteBatch batch, float dt) {
-        batch.draw(smile_happyRegion, resetButton.bounds.x, resetButton.bounds.y, resetButton.bounds.width, resetButton.bounds.height);
+        //batch.draw(smile_happyRegion, resetButton.bounds.x, resetButton.bounds.y, resetButton.bounds.width, resetButton.bounds.height);
         batch.setProjectionMatrix(cameraFont.combined);
         font.setColor(Color.BLACK);
         tmplayout = new GlyphLayout(font, String.format("%02d", (int) blackTerritory));
